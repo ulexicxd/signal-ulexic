@@ -6,4 +6,5 @@
 # How to use
 
 * Creation
+  
   ``signal.new()``
