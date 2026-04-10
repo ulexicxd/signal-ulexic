@@ -4,8 +4,22 @@
 * Open for use by anyone.
 
 # How to use
--# Signal being the required module.
+*Signal - required module.*
+*CreatedSignal - created signal.*
+*Connection - connection created upon connecting.*
 
 * Creation
   
   ``Signal.new()``
+  Creates an object with all of the below listed methods.
+
+* Connecting
+
+  ``CreatedSignal:Connect(function)``
+  Listens to the signal's calls, executing a function with the given parameters on call.
+  Disconnect with ``Connection:Disconnect()``.
+
+***
+
+  ``CreatedSignal:Once(function)``
+  
