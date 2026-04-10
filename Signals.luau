@@ -1,102 +1,79 @@
-function RandomCharacters(length:number)
-	local characters = ""
-
-	for index = 1, length do
-		characters = characters .. string.char(math.random(65,90))
-	end
-
-	return characters
-end
-
 local Signal = {}
 Signal.__index = Signal
 
-function Signal.new()
-	local self = setmetatable({},Signal)
+type Connection = {
+	Disconnect: (self: Connection) -> (),
+	_callback: (...any) -> (),
+	_signal: Signal,
+}
 
+export type Signal = {
+	__index: Signal,
+	_listeners: { [Connection]: boolean },
+	new: () -> Signal,
+	Fire: (self: Signal, ...any) -> (),
+	Connect: (self: Signal, callback: (...any) -> ()) -> Connection,
+	Once: (self: Signal, callback: (...any) -> ()) -> Connection,
+	Wait: (self: Signal) -> ...any,
+	DisconnectAll: (self: Signal) -> (),
+	Destroy: (self: Signal) -> (),
+}
+
+function Signal.new(): Signal
+	local self = setmetatable({}, Signal)
 	self._listeners = {}
+	return (self :: any) :: Signal
+end
 
-	return self
+function Signal:Connect(callback: (...any) -> ()): Connection
+	local connection = {}
+	connection._callback = callback
+	connection._signal = self
+
+	function connection:Disconnect()
+		if self._signal then
+			self._signal._listeners[self] = nil
+			self._signal = nil
+		end
+	end
+
+	self._listeners[connection] = true
+	return connection :: Connection
+end
+
+function Signal:Fire(...: any)
+	for connection in pairs(self._listeners) do
+		task.spawn(connection._callback, ...)
+	end
+end
+
+function Signal:Once(callback: (...any) -> ()): Connection
+	local connection
+	connection = self:Connect(function(...: any)
+		connection:Disconnect()
+		callback(...)
+	end)
+	return connection
+end
+
+function Signal:Wait(): ...any
+	local thread = coroutine.running()
+	self:Once(function(...: any)
+		task.spawn(thread, ...)
+	end)
+	return coroutine.yield()
+end
+
+function Signal:DisconnectAll()
+	for connection in pairs(self._listeners) do
+		connection:Disconnect()
+	end
 end
 
 function Signal:Destroy()
 	self:DisconnectAll()
-	table.clear(self)
 	setmetatable(self, nil)
-end
-
-function Signal:Fire(...)
-	for _, listener in pairs(self._listeners) do
-		local connectionType = listener._type
-
-		task.spawn(listener._callback, ...)
-
-		if connectionType == "Once" then
-			listener:Disconnect()
-		end
-
-		if not success then warn(result) end
-	end
-end
-
-function Signal:DisconnectAll()
-	for _, listener in pairs(self._listeners) do
-		listener:Disconnect()
-	end
-end
-
-function Signal:Connect(callback:(any) -> ())
-	local index = RandomCharacters(12)
-
-	local signal = self
-
-	self._listeners[index] = {
-		["_callback"] = callback,
-		["_type"] = "Connect",
-		["_index"] = index
-	}
-
-	local listener = self._listeners[index]
-
-	function listener:Disconnect()
-		signal._listeners[index] = nil
-	end
-
-	return listener
-end
-
-function Signal:Once(callback:(any) -> ())
-	local index = RandomCharacters(12)
-
-	local signal = self
-
-	self._listeners[index] = {
-		["_callback"] = callback,
-		["_once"] = "Once",
-		["_index"] = index
-	}
-
-	local listener = self._listeners[index]
-
-	function listener:Disconnect()
-		signal._listeners[index] = nil
-	end
-
-	return listener
-end
-
-function Signal:Wait()
-	local thread = coroutine.running()
-	local connection
-
-	connection = self:Connect(function(...)
-		connection:Disconnect()
-		if coroutine.status(thread) ~= "dead" then
-			task.spawn(thread, ...)
-		end
-	end)
-
-	return coroutine.yield()
+	self._listeners = nil
 end
 
 return Signal
