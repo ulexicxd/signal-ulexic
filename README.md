@@ -4,7 +4,8 @@
 * Open for use by anyone.
 
 # How to use
+-# Signal being the required module.
 
 * Creation
   
-  ``signal.new()``
+  ``Signal.new()``
