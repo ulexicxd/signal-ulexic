@@ -1,13 +1,3 @@
-function RandomCharacters(length:number)
-	local characters = ""
-
-	for index = 1, length do
-		characters = characters .. string.char(math.random(65,90))
-	end
-
-	return characters
-end
-
 local Signal = {}
 Signal.__index = Signal
 
@@ -19,25 +9,33 @@ function Signal.new()
 	return self
 end
 
-function Signal:Fire(...)
-	for _, listener in self._listeners do
-		local connectionType = listener._type
+function Signal:Destroy()
+	self:DisconnectAll()
+	table.clear(self)
+	setmetatable(self, nil)
+end
 
-		if connectionType == "Wait" then
-			listener._active = false
-			listener._callback(...)
+function Signal:Fire(...)
+	for _, listener in pairs(table.clone(self._listeners)) do
+		local connectionType = listener._type
+		local success, result = pcall(listener._callback, ...)
+
+		if connectionType == "Once" then
 			listener:Disconnect()
-		elseif connectionType == "Once" then
-			listener._callback(...)
-			listener:Disconnect()
-		else
-			listener._callback(...)
 		end
+
+		if not success then warn(result) end
+	end
+end
+
+function Signal:DisconnectAll()
+	for _, listener in pairs(self._listeners) do
+		listener:Disconnect()
 	end
 end
 
 function Signal:Connect(callback:(any) -> ())
-	local index = RandomCharacters(12)
+	local index = tostring({})
 
 	local signal = self
 
@@ -57,13 +55,13 @@ function Signal:Connect(callback:(any) -> ())
 end
 
 function Signal:Once(callback:(any) -> ())
-	local index = RandomCharacters(12)
+	local index = tostring({})
 
 	local signal = self
 
 	self._listeners[index] = {
 		["_callback"] = callback,
-		["_type"] = "Once",
+		["_once"] = "Once",
 		["_index"] = index
 	}
 
@@ -82,7 +80,9 @@ function Signal:Wait()
 
 	connection = self:Connect(function(...)
 		connection:Disconnect()
-		task.spawn(thread,...)
+		if coroutine.status(thread) ~= "dead" then
+			task.spawn(thread, ...)
+		end
 	end)
 
 	return coroutine.yield()
