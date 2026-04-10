@@ -1,3 +1,13 @@
+function RandomCharacters(length:number)
+	local characters = ""
+
+	for index = 1, length do
+		characters = characters .. string.char(math.random(65,90))
+	end
+
+	return characters
+end
+
 local Signal = {}
 Signal.__index = Signal
 
@@ -16,9 +26,10 @@ function Signal:Destroy()
 end
 
 function Signal:Fire(...)
-	for _, listener in pairs(table.clone(self._listeners)) do
+	for _, listener in pairs(self._listeners) do
 		local connectionType = listener._type
-		local success, result = pcall(listener._callback, ...)
+
+		task.spawn(listener._callback, ...)
 
 		if connectionType == "Once" then
 			listener:Disconnect()
@@ -35,7 +46,7 @@ function Signal:DisconnectAll()
 end
 
 function Signal:Connect(callback:(any) -> ())
-	local index = tostring({})
+	local index = RandomCharacters(12)
 
 	local signal = self
 
@@ -55,7 +66,7 @@ function Signal:Connect(callback:(any) -> ())
 end
 
 function Signal:Once(callback:(any) -> ())
-	local index = tostring({})
+	local index = RandomCharacters(12)
 
 	local signal = self
 
