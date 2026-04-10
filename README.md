@@ -22,13 +22,9 @@
   Listens to the signal's calls, executing a function with the values passed in ``CreatedSignal:Fire()``.  
   Disconnect with ``Connection:Disconnect()``.  
   
-***
-  
   ``CreatedSignal:Once(function)``  
   Listens to the signal's calls, executing a function with the values passed in ``CreatedSignal:Fire()`` disconnecting after a single call.  
   Disconnect with ``Connection:Disconnect()``.  
-  
-***
   
   ``CreatedSignal:Wait()``  
   Listens to the signal's calls, returning values passed in ``CreatedSignal:Fire()``.  
@@ -37,8 +33,8 @@
 * Firing
   
   ``Signal:Fire(any)``  
-  Fires a signal, calling all listeners with the passed values.  
-  
+  Fires a signal, calling all listeners with the passed values.
+
 ***
   
 Thank you for using my Signal module, I greatly appreciate support.  
