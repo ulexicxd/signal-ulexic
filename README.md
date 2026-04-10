@@ -8,18 +8,37 @@
 *CreatedSignal - created signal.*
 *Connection - connection created upon connecting.*
 
-* Creation
+* Creation and destruction
   
   ``Signal.new()``
-  Creates an object with all of the below listed methods.
+  Creates a signal object with all of the below listed methods.
+
+  ``Signal:Destroy()``
+  Destroys the signal object.
 
 * Connecting
 
-  ``CreatedSignal:Connect(function)``
-  Listens to the signal's calls, executing a function with the given parameters on call.
+  ``CreatedSignal:Connect(function(parameters))``
+  Listens to the signal's calls, executing a function with the values passed in ``CreatedSignal:Fire()``.
   Disconnect with ``Connection:Disconnect()``.
 
 ***
 
   ``CreatedSignal:Once(function)``
+  Listens to the signal's calls, executing a function with the values passed in ``CreatedSignal:Fire()`` disconnecting after a single call.
+  Disconnect with ``Connection:Disconnect()``.
   
+***
+
+  ``CreatedSignal:Wait()``
+  Listens to the signal's calls, returning values passed in ``CreatedSignal:Fire()``.
+  Cannot be disconnected.
+
+* Firing
+
+  ``Signal:Fire(any)``
+  Fires a signal, calling all listeners with the passed values.
+
+***
+
+Thank you for using my Signal module, I greatly appreciate support.
