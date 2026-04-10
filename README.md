@@ -27,7 +27,7 @@
   ``CreatedSignal:Once(function)``
   Listens to the signal's calls, executing a function with the values passed in ``CreatedSignal:Fire()`` disconnecting after a single call.
   Disconnect with ``Connection:Disconnect()``.
-  
+
 ***
 
   ``CreatedSignal:Wait()``
