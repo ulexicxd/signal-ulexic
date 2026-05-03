@@ -1,31 +1,13 @@
 local Signal = {}
 Signal.__index = Signal
 
-type Connection = {
-	Disconnect: (self: Connection) -> (),
-	_callback: (...any) -> (),
-	_signal: Signal,
-}
-
-export type Signal = {
-	__index: Signal,
-	_listeners: { [Connection]: boolean },
-	new: () -> Signal,
-	Fire: (self: Signal, ...any) -> (),
-	Connect: (self: Signal, callback: (...any) -> ()) -> Connection,
-	Once: (self: Signal, callback: (...any) -> ()) -> Connection,
-	Wait: (self: Signal) -> ...any,
-	DisconnectAll: (self: Signal) -> (),
-	Destroy: (self: Signal) -> (),
-}
-
-function Signal.new(): Signal
+function Signal.new()
 	local self = setmetatable({}, Signal)
 	self._listeners = {}
-	return (self :: any) :: Signal
+	return (self :: any)
 end
 
-function Signal:Connect(callback: (...any) -> ()): Connection
+function Signal:Connect(callback: (...any) -> ())
 	local connection = {}
 	connection._callback = callback
 	connection._signal = self
@@ -47,7 +29,7 @@ function Signal:Fire(...: any)
 	end
 end
 
-function Signal:Once(callback: (...any) -> ()): Connection
+function Signal:Once(callback: (...any) -> ())
 	local connection
 	connection = self:Connect(function(...: any)
 		connection:Disconnect()
@@ -56,7 +38,7 @@ function Signal:Once(callback: (...any) -> ()): Connection
 	return connection
 end
 
-function Signal:Wait(): ...any
+function Signal:Wait()
 	local thread = coroutine.running()
 	self:Once(function(...: any)
 		task.spawn(thread, ...)
