@@ -20,7 +20,7 @@ function Signal:Connect(callback: (...any) -> ())
 	end
 
 	self._listeners[connection] = true
-	return connection :: Connection
+	return connection
 end
 
 function Signal:Fire(...: any)
